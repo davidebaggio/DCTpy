@@ -2,7 +2,7 @@
 all: install exe
 
 exe:
-	python3 -B ./src/main.py
+	python3 ./src/main.py
 
 install:
 	python3 -m pip install opencv-python

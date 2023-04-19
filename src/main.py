@@ -1,72 +1,42 @@
-# import required libraries
-from colorconversion import *
-from imgDCT_IDCT import *
-from quantization import *
-from math import *
+from image_compression import *
 
-image = get_image(str(input("Image filepath: ")))
+filepath = str(input("Image filepath: "))
+
 block_size = int(input("Block size: "))
-image = img_resize(image, block_size)
 
 R = float(input("Parameter of quantization: "))
 while R <= 0 or R >= 100:
     R = float(input("This value must be in range (0, 100): "))
 
-# extract Y, Cb, Cr channels
-y, Cr, Cb = color2YCrCb(image)
+img_comp(filepath, block_size, R, info=True)
 
-""" y = normalize_Mat(y)
-Cr = normalize_Mat(Cr)
-Cb = normalize_Mat(Cb) """
+jumps = [10, 20, 30, 40, 50, 60, 70, 80, 92, 94, 96, 98, 99]
+mse = []
+psnr = []
 
-y_dct = blocks_DCT(y, block_size)
-cr_dct = blocks_DCT(Cr, block_size)
-cb_dct = blocks_DCT(Cb, block_size)
+for i in jumps:
+    print("Compression parameter R:%s ..." % i)
+    m, p = img_comp(filepath, block_size, i)
+    mse.append(m)
+    psnr.append(p)
 
-cv2.imshow("y_dct", y_dct)
-cv2.imshow("cr_dct", cr_dct)
-cv2.imshow("cb_dct", cb_dct)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+for i in range(len(jumps)):
+    mse[i] = round(mse[i], 3)
+    psnr[i] = round(psnr[i], 3)
 
-y_qdct = quantization_of_matrix(y_dct, R)
-cr_qdct = quantization_of_matrix(cr_dct, R)
-cb_qdct = quantization_of_matrix(cb_dct, R)
+fig, (ax1, ax2) = plt.subplots(2)
+ax1.set_title("MSE")
+for i, txt in enumerate(mse):
+    ax1.annotate(txt, (jumps[i], mse[i]))
+ax2.set_title("PSNR")
+for i, txt in enumerate(psnr):
+    ax2.annotate(txt, (jumps[i], psnr[i]))
+ax1.plot(jumps, mse, '-o')
+ax2.plot(jumps, psnr, '-o')
+plt.show()
 
-cv2.imshow("y_qdct", y_qdct)
-cv2.imshow("cr_qdct", cr_qdct)
-cv2.imshow("cb_qdct", cb_qdct)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-backY = blocks_IDCT(y_qdct, block_size)
-backCr = blocks_IDCT(cr_qdct, block_size)
-backCb = blocks_IDCT(cb_qdct, block_size)
-
-""" backY = inormalize_Mat(backY)
-backCr = inormalize_Mat(backCr)
-backCb = inormalize_Mat(backCb) """
-
-cv2.imshow("y_back", backY)
-cv2.imshow("cr_back", backCr)
-cv2.imshow("cb_back", backCb)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-merged = cv2.merge([backY, backCr, backCb])
-final_image = cv2.cvtColor(merged, cv2.COLOR_YCrCb2BGR)
-cv2.imshow("final", final_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-cv2.imwrite("./img/out.jpg", final_image)
-
-MSE_y = np.mean(np.square(np.subtract(y, backY)))
-MSE_Cr = np.mean(np.square(np.subtract(Cr, backCr)))
-MSE_Cb = np.mean(np.square(np.subtract(Cb, backCb)))
-
-MSE_p = (3/4) * MSE_y + (1/8) * (MSE_Cr + MSE_Cb)
-PSNR = 10*log10(pow(255, 2)/MSE_p)
-
-print(MSE_p)
-print(PSNR)
+""" plt.plot(jumps, mse)
+plt.ylabel("MSE")
+plt.xlabel("R%")
+plt.title("MSE")
+plt.show() """

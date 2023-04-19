@@ -33,12 +33,11 @@ def blocks_IDCT(DCT_Mat, block_size):
     blocksV = int(h / block_size)
     blocksH = int(w / block_size)
     idct_mat = np.zeros((h, w), np.float32)
-    temp = np.float32(DCT_Mat)
     for row in range(blocksV):
         for col in range(blocksH):
             sr = row*block_size
             fr = (row+1)*block_size
             sc = col*block_size
             fc = (col+1)*block_size
-            cv2.idct(temp[sr:fr, sc:fc], idct_mat[sr:fr, sc:fc])
+            cv2.idct(np.copy(DCT_Mat[sr:fr, sc:fc]), idct_mat[sr:fr, sc:fc])
     return np.uint8(idct_mat)
