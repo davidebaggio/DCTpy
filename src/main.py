@@ -15,6 +15,10 @@ while R <= 0 or R >= 100:
 # extract Y, Cb, Cr channels
 y, Cr, Cb = color2YCrCb(image)
 
+""" y = normalize_Mat(y)
+Cr = normalize_Mat(Cr)
+Cb = normalize_Mat(Cb) """
+
 y_dct = blocks_DCT(y, block_size)
 cr_dct = blocks_DCT(Cr, block_size)
 cb_dct = blocks_DCT(Cb, block_size)
@@ -38,6 +42,10 @@ cv2.destroyAllWindows()
 backY = blocks_IDCT(y_qdct, block_size)
 backCr = blocks_IDCT(cr_qdct, block_size)
 backCb = blocks_IDCT(cb_qdct, block_size)
+
+""" backY = inormalize_Mat(backY)
+backCr = inormalize_Mat(backCr)
+backCb = inormalize_Mat(backCb) """
 
 cv2.imshow("y_back", backY)
 cv2.imshow("cr_back", backCr)
